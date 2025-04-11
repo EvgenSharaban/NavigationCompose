@@ -4,9 +4,13 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import com.example.navigation.implementations.EmptyRouter
+import com.example.navigation.internal.EmptyRouter
+import com.example.navigation.internal.NavigationEvent
+import kotlinx.coroutines.flow.filterIsInstance
 
 val LocalRouter = staticCompositionLocalOf<Router> {
     EmptyRouter
@@ -24,11 +28,21 @@ fun NavigationHost(
         router.pop()
     }
 
-    Box(modifier = modifier) {
-        CompositionLocalProvider(
-            LocalRouter provides router
-        ) {
-            routeMapper.invoke(navigationState.currentRoute)
+    val saveableStateHolder = rememberSaveableStateHolder()
+    saveableStateHolder.SaveableStateProvider(key = navigationState.currentRoute) {
+        Box(modifier = modifier) {
+            CompositionLocalProvider(
+                LocalRouter provides router
+            ) {
+                routeMapper.invoke(navigationState.currentRoute)
+            }
         }
+    }
+    LaunchedEffect(navigation) {
+        navigation.internalNavigationState.listen()
+            .filterIsInstance<NavigationEvent.Removed>()
+            .collect { event ->
+                saveableStateHolder.removeState(event.route)
+            }
     }
 }

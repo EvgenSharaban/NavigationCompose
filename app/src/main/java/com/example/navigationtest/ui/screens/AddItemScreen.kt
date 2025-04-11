@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.example.navigation.LocalRouter
 import com.example.navigationtest.ItemsRepository
 import com.example.navigationtest.R
+import com.example.navigationtest.ui.AppRoute
 
 @Composable
 fun AddItemScreen() {
@@ -32,12 +33,18 @@ fun AddItemScreen() {
         onSubmitNewItem = {
             itemsRepository.addItem(it)
             router.pop()
+        },
+        onLaunchSettingsScreen = {
+            router.launch(AppRoute.Tab.Settings)
         }
     )
 }
 
 @Composable
-fun AddItemContent(onSubmitNewItem: (String) -> Unit) {
+fun AddItemContent(
+    onSubmitNewItem: (String) -> Unit,
+    onLaunchSettingsScreen: () -> Unit
+) {
     var newItemValue by rememberSaveable { mutableStateOf("") }
     val isAddEnabled by remember {
         derivedStateOf { newItemValue.isNotEmpty() }
@@ -62,11 +69,18 @@ fun AddItemContent(onSubmitNewItem: (String) -> Unit) {
         ) {
             Text(text = stringResource(R.string.add_new_item))
         }
+
+
+        Button(
+            onClick = onLaunchSettingsScreen
+        ) {
+            Text(text = "Launch Settings")
+        }
     }
 }
 
 @Preview(showSystemUi = true)
 @Composable
 private fun AddItemPreview() {
-    AddItemContent(onSubmitNewItem = {})
+    AddItemContent(onSubmitNewItem = {}, onLaunchSettingsScreen = {})
 }

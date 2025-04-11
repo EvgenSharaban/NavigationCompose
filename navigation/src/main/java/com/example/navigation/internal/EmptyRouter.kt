@@ -1,4 +1,4 @@
-package com.example.navigation.implementations
+package com.example.navigation.internal
 
 import com.example.navigation.Route
 import com.example.navigation.Router
