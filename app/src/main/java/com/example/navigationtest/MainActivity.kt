@@ -3,9 +3,7 @@ package com.example.navigationtest
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,12 +16,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
@@ -38,19 +33,16 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,24 +50,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.navigation.NavigationHost
+import com.example.navigation.rememberNavigation
 import com.example.navigationtest.ui.theme.NavigationTestTheme
 
-sealed class Route(
-    @StringRes val titleRes: Int
-) {
-    object AddItem : Route(R.string.add_item)
-
-    sealed class Tab(
-        @StringRes titleRes: Int,
-        val icon: ImageVector,
-    ) : Route(titleRes) {
-        object Items : Tab(R.string.items, Icons.AutoMirrored.Default.List)
-        object Settings : Tab(R.string.settings, Icons.Default.Settings)
-        object Profile : Tab(R.string.profile, Icons.Default.AccountBox)
-    }
-}
-
-val RootTabs = listOf(Route.Tab.Items, Route.Tab.Settings, Route.Tab.Profile)
+val RootTabs = listOf(AppRoute.Tab.Items, AppRoute.Tab.Settings, AppRoute.Tab.Profile)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,22 +73,18 @@ class MainActivity : ComponentActivity() {
 fun AppScreen(itemsRepository: ItemsRepository = ItemsRepository.get()) {
 
     val items by itemsRepository.getItems().collectAsStateWithLifecycle()
-    val stack = remember {
-        mutableStateListOf<Route>(Route.Tab.Items)
-    }
-    val currentRoute = stack.last()
-    val isRoot = stack.size == 1
 
-    BackHandler(enabled = !isRoot) {
-        stack.removeLastOrNull()
-    }
+    val navigation = rememberNavigation(initialRoute = AppRoute.Tab.Items)
+    val (router, navigationState) = navigation
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = stringResource(currentRoute.titleRes),
+                        text = stringResource(
+                            (navigationState.currentRoute as? AppRoute)?.titleRes ?: R.string.app_name
+                        ),
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -120,11 +95,11 @@ fun AppScreen(itemsRepository: ItemsRepository = ItemsRepository.get()) {
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            if (!isRoot) stack.removeLastOrNull()
+                            if (!navigationState.isRoot) router.pop()
                         }
                     ) {
                         Icon(
-                            imageVector = if (isRoot) Icons.Default.Menu else Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = if (navigationState.isRoot) Icons.Default.Menu else Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = null
                         )
                     }
@@ -168,9 +143,9 @@ fun AppScreen(itemsRepository: ItemsRepository = ItemsRepository.get()) {
             )
         },
         floatingActionButton = {
-            if (currentRoute == Route.Tab.Items) {
+            if (navigationState.currentRoute == AppRoute.Tab.Items) {
                 FloatingActionButton(
-                    onClick = { stack.add(Route.AddItem) }
+                    onClick = { router.launch(AppRoute.AddItem) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -181,15 +156,14 @@ fun AppScreen(itemsRepository: ItemsRepository = ItemsRepository.get()) {
         },
         floatingActionButtonPosition = FabPosition.End,
         bottomBar = {
-            if (isRoot) {
+            if (navigationState.isRoot) {
                 NavigationBar {
                     RootTabs.forEach { tab ->
                         NavigationBarItem(
-                            selected = currentRoute == tab,
+                            selected = navigationState.currentRoute == tab,
                             label = { Text(stringResource(tab.titleRes)) },
                             onClick = {
-                                stack.clear()
-                                stack.add(tab)
+                                router.restart(tab)
                             },
                             icon = {
                                 Icon(
@@ -203,15 +177,18 @@ fun AppScreen(itemsRepository: ItemsRepository = ItemsRepository.get()) {
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+        NavigationHost(
+            navigation = navigation,
+            modifier = Modifier.padding(paddingValues)
+        ) { currentRoute ->
             when (currentRoute) {
-                Route.Tab.Items -> ItemsScreen(items)
-                Route.Tab.Settings -> SettingsScreen()
-                Route.Tab.Profile -> ProfileScreen()
-                Route.AddItem -> AddItemScreen(
+                AppRoute.Tab.Items -> ItemsScreen(items)
+                AppRoute.Tab.Settings -> SettingsScreen()
+                AppRoute.Tab.Profile -> ProfileScreen()
+                AppRoute.AddItem -> AddItemScreen(
                     onSubmitNewItem = {
                         itemsRepository.addItem(it)
-                        stack.removeLastOrNull()
+                        router.pop()
                     }
                 )
             }
