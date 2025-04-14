@@ -1,33 +1,29 @@
 package com.example.navigationtest.ui
 
-import androidx.annotation.StringRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.navigation.Route
-import com.example.navigationtest.R
+import com.example.navigationtest.ui.screens.AddItemScreenProducer
+import com.example.navigationtest.ui.screens.ItemsScreenProducer
+import com.example.navigationtest.ui.screens.ProfileScreenProducer
+import com.example.navigationtest.ui.screens.SettingsScreenProducer
 import kotlinx.parcelize.Parcelize
 
 sealed class AppRoute(
-    @StringRes val titleRes: Int
+    override val screenProducer: () -> AppScreen
 ) : Route {
 
     @Parcelize
-    data object AddItem : AppRoute(R.string.add_item)
+    data object AddItem : AppRoute(AddItemScreenProducer)
 
     sealed class Tab(
-        @StringRes titleRes: Int,
-        val icon: ImageVector,
-    ) : AppRoute(titleRes) {
+        screenProducer: () -> AppScreen
+    ) : AppRoute(screenProducer) {
         @Parcelize
-        data object Items : Tab(R.string.items, Icons.AutoMirrored.Default.List)
-
+        data object Items : Tab(ItemsScreenProducer)
         @Parcelize
-        data object Settings : Tab(R.string.settings, Icons.Default.Settings)
-
+        data object Settings : Tab(SettingsScreenProducer)
         @Parcelize
-        data object Profile : Tab(R.string.profile, Icons.Default.AccountBox)
+        data object Profile : Tab(ProfileScreenProducer)
     }
 }
+
+val RootTabs = listOf(AppRoute.Tab.Items, AppRoute.Tab.Settings, AppRoute.Tab.Profile)

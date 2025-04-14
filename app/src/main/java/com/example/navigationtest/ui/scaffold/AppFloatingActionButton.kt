@@ -1,25 +1,25 @@
 package com.example.navigationtest.ui.scaffold
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.example.navigation.Navigation
 import com.example.navigationtest.R
-import com.example.navigationtest.ui.AppRoute
+import com.example.navigationtest.ui.FloatingAction
 
 @Composable
-fun AppFloatingActionButton(navigation: Navigation) {
-    val (router, navigationState) = navigation
-
-    if (navigationState.currentRoute == AppRoute.Tab.Items) {
+fun AppFloatingActionButton(
+    floatingAction: FloatingAction?,
+    modifier: Modifier = Modifier
+) {
+    if (floatingAction != null) {
         FloatingActionButton(
-            onClick = { router.launch(AppRoute.AddItem) }
+            modifier = modifier,
+            onClick = floatingAction.onClick
         ) {
             Icon(
-                imageVector = Icons.Default.Add,
+                imageVector = floatingAction.icon,
                 contentDescription = stringResource(R.string.add_new_item)
             )
         }

@@ -24,20 +24,31 @@ import com.example.navigation.LocalRouter
 import com.example.navigationtest.ItemsRepository
 import com.example.navigationtest.R
 import com.example.navigationtest.ui.AppRoute
+import com.example.navigationtest.ui.AppScreen
+import com.example.navigationtest.ui.AppScreenEnvironment
 
-@Composable
-fun AddItemScreen() {
-    val itemsRepository = ItemsRepository.get()
-    val router = LocalRouter.current
-    AddItemContent(
-        onSubmitNewItem = {
-            itemsRepository.addItem(it)
-            router.pop()
-        },
-        onLaunchSettingsScreen = {
-            router.launch(AppRoute.Tab.Settings)
-        }
-    )
+val AddItemScreenProducer = { AddItemScreen() }
+
+class AddItemScreen : AppScreen {
+    override val environment = AppScreenEnvironment().apply {
+        titleRes = R.string.add_item
+    }
+
+
+    @Composable
+    override fun Content() {
+        val itemsRepository = ItemsRepository.get()
+        val router = LocalRouter.current
+        AddItemContent(
+            onSubmitNewItem = {
+                itemsRepository.addItem(it)
+                router.pop()
+            },
+            onLaunchSettingsScreen = {
+                router.launch(AppRoute.Tab.Settings)
+            }
+        )
+    }
 }
 
 @Composable

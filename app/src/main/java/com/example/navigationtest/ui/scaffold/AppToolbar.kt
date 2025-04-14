@@ -1,6 +1,7 @@
 package com.example.navigationtest.ui.scaffold
 
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
@@ -19,26 +20,29 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import com.example.navigation.Navigation
-import com.example.navigationtest.ItemsRepository
+import com.example.navigation.Route
 import com.example.navigationtest.R
 import com.example.navigationtest.ui.AppRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppToolbar(navigation: Navigation) {
-    val (router, navigationState) = navigation
-    val itemsRepository: ItemsRepository = ItemsRepository.get()
-
+fun AppToolbar(
+    @StringRes titleRes: Int,
+    isRoot: Boolean,
+    currentRoute: Route,
+    onPopAction: () -> Unit,
+    onClearAction: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     CenterAlignedTopAppBar(
+        modifier = modifier,
         title = {
             Text(
-                text = stringResource(
-                    (navigationState.currentRoute as? AppRoute)?.titleRes ?: R.string.app_name
-                ),
+                text = stringResource(titleRes),
                 fontWeight = FontWeight.Bold
             )
         },
@@ -49,11 +53,11 @@ fun AppToolbar(navigation: Navigation) {
         navigationIcon = {
             IconButton(
                 onClick = {
-                    if (!navigationState.isRoot) router.pop()
+                    if (!isRoot) onPopAction()
                 }
             ) {
                 Icon(
-                    imageVector = if (navigationState.isRoot) Icons.Default.Menu else Icons.AutoMirrored.Filled.ArrowBack,
+                    imageVector = if (isRoot) Icons.Default.Menu else Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null
                 )
             }
@@ -85,11 +89,11 @@ fun AppToolbar(navigation: Navigation) {
                     }
                 )
 
-                if (navigationState.currentRoute == AppRoute.Tab.Items) {
+                if (currentRoute == AppRoute.Tab.Items) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.clear)) },
                         onClick = {
-                            itemsRepository.clear()
+                            onClearAction()
                             showPopupMenu = false
                         }
                     )
