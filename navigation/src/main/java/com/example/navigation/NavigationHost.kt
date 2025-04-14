@@ -22,14 +22,18 @@ fun NavigationHost(
     modifier: Modifier = Modifier,
     routeMapper: @Composable (Route) -> Unit,
 ) {
-    val (router, navigationState) = navigation
+    val (
+        router,
+        navigationState,
+        internalState
+    ) = navigation
 
     BackHandler(enabled = !navigationState.isRoot) {
         router.pop()
     }
 
     val saveableStateHolder = rememberSaveableStateHolder()
-    saveableStateHolder.SaveableStateProvider(key = navigationState.currentRoute) {
+    saveableStateHolder.SaveableStateProvider(key = internalState.currentUuid) {
         Box(modifier = modifier) {
             CompositionLocalProvider(
                 LocalRouter provides router
@@ -42,7 +46,7 @@ fun NavigationHost(
         navigation.internalNavigationState.listen()
             .filterIsInstance<NavigationEvent.Removed>()
             .collect { event ->
-                saveableStateHolder.removeState(event.route)
+                saveableStateHolder.removeState(event.routeRecord.uuid)
             }
     }
 }

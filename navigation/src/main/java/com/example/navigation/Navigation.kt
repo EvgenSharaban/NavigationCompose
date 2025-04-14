@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.example.navigation.internal.InternalNavigationState
+import com.example.navigation.internal.RouteRecord
 import com.example.navigation.internal.ScreenStack
 
 @ConsistentCopyVisibility
@@ -19,7 +20,7 @@ data class Navigation internal constructor(
 @Composable
 fun rememberNavigation(initialRoute: Route): Navigation {
     val screenStack = rememberSaveable(initialRoute) {
-        ScreenStack(mutableStateListOf(initialRoute))
+        ScreenStack(mutableStateListOf(RouteRecord(initialRoute)))
     }
 
     return remember(initialRoute) {
