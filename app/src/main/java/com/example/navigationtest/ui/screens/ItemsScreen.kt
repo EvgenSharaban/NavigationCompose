@@ -1,10 +1,11 @@
 package com.example.navigationtest.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
@@ -40,7 +41,7 @@ class ItemsScreen : AppScreen {
         floatingAction = FloatingAction(
             icon = Icons.Default.Add,
             onClick = {
-                router?.launch(AppRoute.AddItem)
+                router?.launch(AppRoute.Item(ItemScreenArgs.Add))
             }
         )
         dropdownList = listOf(
@@ -70,7 +71,10 @@ class ItemsScreen : AppScreen {
         }
         ItemsContent(
             isItemsEmpty = isEmpty,
-            items = { items }
+            items = { items },
+            onItemClicked = { index ->
+                router?.launch(AppRoute.Item(ItemScreenArgs.Edit(index)))
+            }
         )
     }
 }
@@ -78,7 +82,8 @@ class ItemsScreen : AppScreen {
 @Composable
 fun ItemsContent(
     isItemsEmpty: Boolean,
-    items: () -> List<String>
+    items: () -> List<String>,
+    onItemClicked: (Int) -> Unit,
 ) {
     if (isItemsEmpty) {
         Text(
@@ -92,10 +97,16 @@ fun ItemsContent(
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(items.invoke()) { item ->
+            val itemsList = items()
+            items(itemsList.size) { index ->
                 Text(
-                    text = item,
-                    modifier = Modifier.padding(all = 8.dp)
+                    text = itemsList[index],
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onItemClicked(index)
+                        }
+                        .padding(all = 8.dp)
                 )
             }
         }

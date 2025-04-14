@@ -9,5 +9,6 @@
     <string name="scaffold_app">Scaffold app</string>
     <string name="add_new_item">Add new item</string>
     <string name="no_items">No items</string>
-    <string name="enrer_new_value">Enter New value</string>
+    <string name="enter_new_value">Enter New value</string>
+    <string name="edit_item">Edit item</string>
 </resources>

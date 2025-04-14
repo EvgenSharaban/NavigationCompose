@@ -1,5 +1,6 @@
 package com.example.navigationtest.ui.screens
 
+import android.os.Parcelable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,12 +29,29 @@ import com.example.navigationtest.ui.AppScreen
 import com.example.navigationtest.ui.AppScreenEnvironment
 import com.example.navigationtest.ui.DropdownItem
 import com.example.navigationtest.ui.scaffold.showToast
+import kotlinx.parcelize.Parcelize
 
-val AddItemScreenProducer = { AddItemScreen() }
+fun itemScreenProducer(args: ItemScreenArgs): () -> ItemScreen {
+    return { ItemScreen(args) }
+}
 
-class AddItemScreen : AppScreen {
+sealed class ItemScreenArgs : Parcelable {
+    @Parcelize
+    data object Add : ItemScreenArgs()
+
+    @Parcelize
+    data class Edit(val index: Int) : ItemScreenArgs()
+}
+
+class ItemScreen(
+    private val args: ItemScreenArgs,
+) : AppScreen {
     override val environment = AppScreenEnvironment().apply {
-        titleRes = R.string.add_item
+        titleRes = if (args is ItemScreenArgs.Add) {
+            R.string.add_item
+        } else {
+            R.string.edit_item
+        }
         dropdownList = listOf(
             DropdownItem(
                 name = R.string.about,
@@ -48,9 +66,19 @@ class AddItemScreen : AppScreen {
     override fun Content() {
         val itemsRepository = ItemsRepository.get()
         val router = LocalRouter.current
-        AddItemContent(
-            onSubmitNewItem = {
-                itemsRepository.addItem(it)
+        ItemContent(
+            initialValue = if (args is ItemScreenArgs.Edit) {
+                remember { itemsRepository.getItems().value[args.index] }
+            } else {
+                ""
+            },
+            isAddMode = args is ItemScreenArgs.Add,
+            onSubmitNewItem = { newValue ->
+                if (args is ItemScreenArgs.Edit) {
+                    itemsRepository.updateItem(args.index, newValue)
+                } else {
+                    itemsRepository.addItem(newValue)
+                }
                 router.pop()
             },
             onLaunchSettingsScreen = {
@@ -61,13 +89,15 @@ class AddItemScreen : AppScreen {
 }
 
 @Composable
-fun AddItemContent(
+fun ItemContent(
+    initialValue: String = "",
+    isAddMode: Boolean = false,
     onSubmitNewItem: (String) -> Unit,
     onLaunchSettingsScreen: () -> Unit
 ) {
-    var newItemValue by rememberSaveable { mutableStateOf("") }
+    var currentItemValue by rememberSaveable { mutableStateOf(initialValue) }
     val isAddEnabled by remember {
-        derivedStateOf { newItemValue.isNotEmpty() }
+        derivedStateOf { currentItemValue.isNotEmpty() }
     }
     Column(
         verticalArrangement = Arrangement.Center,
@@ -75,19 +105,24 @@ fun AddItemContent(
         modifier = Modifier.fillMaxSize()
     ) {
         OutlinedTextField(
-            value = newItemValue,
-            label = { Text(stringResource(R.string.enrer_new_value)) },
+            value = currentItemValue,
+            label = { Text(stringResource(R.string.enter_new_value)) },
             singleLine = true,
             onValueChange = { enteredValue ->
-                newItemValue = enteredValue
+                currentItemValue = enteredValue
             }
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             enabled = isAddEnabled,
-            onClick = { onSubmitNewItem(newItemValue) }
+            onClick = { onSubmitNewItem(currentItemValue) }
         ) {
-            Text(text = stringResource(R.string.add_new_item))
+            val buttonText = if (isAddMode) {
+                R.string.add_new_item
+            } else {
+                R.string.edit_item
+            }
+            Text(text = stringResource(buttonText))
         }
 
 
@@ -101,6 +136,6 @@ fun AddItemContent(
 
 @Preview(showSystemUi = true)
 @Composable
-private fun AddItemPreview() {
-    AddItemContent(onSubmitNewItem = {}, onLaunchSettingsScreen = {})
+private fun ItemPreview() {
+    ItemContent(onSubmitNewItem = {}, onLaunchSettingsScreen = {})
 }
