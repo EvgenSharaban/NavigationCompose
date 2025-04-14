@@ -1,6 +1,5 @@
 package com.example.navigationtest.ui.scaffold
 
-import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,18 +23,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import com.example.navigation.Route
-import com.example.navigationtest.R
-import com.example.navigationtest.ui.AppRoute
+import com.example.navigationtest.ui.DropdownItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppToolbar(
     @StringRes titleRes: Int,
     isRoot: Boolean,
-    currentRoute: Route,
+    dropdownItemsList: List<DropdownItem>,
     onPopAction: () -> Unit,
-    onClearAction: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     CenterAlignedTopAppBar(
@@ -77,23 +73,11 @@ fun AppToolbar(
                 expanded = showPopupMenu,
                 onDismissRequest = { showPopupMenu = false }
             ) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.about)) },
-                    onClick = {
-                        Toast.makeText(
-                            context,
-                            R.string.scaffold_app,
-                            Toast.LENGTH_LONG
-                        ).show()
-                        showPopupMenu = false
-                    }
-                )
-
-                if (currentRoute == AppRoute.Tab.Items) {
+                dropdownItemsList.forEach { dropdownItem ->
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.clear)) },
+                        text = { Text(stringResource(dropdownItem.name)) },
                         onClick = {
-                            onClearAction()
+                            dropdownItem.onClick(context)
                             showPopupMenu = false
                         }
                     )

@@ -12,6 +12,8 @@ import androidx.compose.ui.unit.sp
 import com.example.navigationtest.R
 import com.example.navigationtest.ui.AppScreen
 import com.example.navigationtest.ui.AppScreenEnvironment
+import com.example.navigationtest.ui.DropdownItem
+import com.example.navigationtest.ui.scaffold.showToast
 
 val ProfileScreenProducer = { ProfileScreen() }
 
@@ -19,6 +21,14 @@ class ProfileScreen : AppScreen {
     override val environment = AppScreenEnvironment().apply {
         titleRes = R.string.profile
         icon = Icons.Default.AccountBox
+        dropdownList = listOf(
+            DropdownItem(
+                name = R.string.about,
+                onClick = { context ->
+                    showToast(context, R.string.scaffold_app)
+                }
+            )
+        )
     }
 
     @Composable

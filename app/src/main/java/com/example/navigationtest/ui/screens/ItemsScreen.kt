@@ -25,7 +25,9 @@ import com.example.navigationtest.R
 import com.example.navigationtest.ui.AppRoute
 import com.example.navigationtest.ui.AppScreen
 import com.example.navigationtest.ui.AppScreenEnvironment
+import com.example.navigationtest.ui.DropdownItem
 import com.example.navigationtest.ui.FloatingAction
+import com.example.navigationtest.ui.scaffold.showToast
 
 val ItemsScreenProducer = { ItemsScreen() }
 
@@ -40,6 +42,20 @@ class ItemsScreen : AppScreen {
             onClick = {
                 router?.launch(AppRoute.AddItem)
             }
+        )
+        dropdownList = listOf(
+            DropdownItem(
+                name = R.string.about,
+                onClick = { context ->
+                    showToast(context, R.string.scaffold_app)
+                }
+            ),
+            DropdownItem(
+                name = R.string.clear,
+                onClick = {
+                    clearList()
+                }
+            )
         )
     }
 
@@ -84,4 +100,9 @@ fun ItemsContent(
             }
         }
     }
+}
+
+private fun clearList() {
+    val itemsRepository: ItemsRepository = ItemsRepository.get()
+    itemsRepository.clear()
 }
