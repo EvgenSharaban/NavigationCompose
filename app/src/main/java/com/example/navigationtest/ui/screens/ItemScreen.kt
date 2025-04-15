@@ -43,6 +43,11 @@ sealed class ItemScreenArgs : Parcelable {
     data class Edit(val index: Int) : ItemScreenArgs()
 }
 
+data class ItemScreenResponse(
+    val args: ItemScreenArgs,
+    val newValue: String,
+)
+
 class ItemScreen(
     private val args: ItemScreenArgs,
 ) : AppScreen {
@@ -74,12 +79,7 @@ class ItemScreen(
             },
             isAddMode = args is ItemScreenArgs.Add,
             onSubmitNewItem = { newValue ->
-                if (args is ItemScreenArgs.Edit) {
-                    itemsRepository.updateItem(args.index, newValue)
-                } else {
-                    itemsRepository.addItem(newValue)
-                }
-                router.pop()
+                router.pop(ItemScreenResponse(args, newValue))
             },
             onLaunchSettingsScreen = {
                 router.launch(AppRoute.Tab.Settings)

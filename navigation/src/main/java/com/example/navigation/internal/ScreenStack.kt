@@ -10,11 +10,13 @@ import com.example.navigation.NavigationState
 import com.example.navigation.Route
 import com.example.navigation.Router
 import com.example.navigation.Screen
+import com.example.navigation.ScreenResponseReceiver
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 internal class ScreenStack(
     private val routes: SnapshotStateList<RouteRecord>,
+    private val screenResponseBus: ScreenResponseBus = ScreenResponseBus()
 ) : NavigationState, Router, InternalNavigationState, Parcelable {
 
     override val isRoot: Boolean get() = routes.size == 1
@@ -23,6 +25,7 @@ internal class ScreenStack(
     override val currentScreen: Screen by derivedStateOf {
         currentRoute.screenProducer()
     }
+    override val screenResponseReceiver: ScreenResponseReceiver = screenResponseBus
 
     private val eventsFlow = MutableSharedFlow<NavigationEvent>(
         extraBufferCapacity = Int.MAX_VALUE
@@ -40,17 +43,22 @@ internal class ScreenStack(
     )
 
     override fun launch(route: Route) {
+        screenResponseBus.cleanUp()
         routes.add(RouteRecord(route))
     }
 
-    override fun pop() {
+    override fun pop(response: Any?) {
         val removedRouteRecord = routes.removeLastOrNull()
         if (removedRouteRecord != null) {
             eventsFlow.tryEmit(NavigationEvent.Removed(removedRouteRecord))
+            if (response != null) {
+                screenResponseBus.send(response)
+            }
         }
     }
 
     override fun restart(route: Route) {
+        screenResponseBus.cleanUp()
         routes.apply {
             routes.forEach {
                 eventsFlow.tryEmit(NavigationEvent.Removed(it))

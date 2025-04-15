@@ -20,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.navigation.LocalRouter
+import com.example.navigation.ResponseListener
 import com.example.navigation.Router
 import com.example.navigationtest.ItemsRepository
 import com.example.navigationtest.R
@@ -68,6 +69,13 @@ class ItemsScreen : AppScreen {
         val items by itemsRepository.getItems().collectAsStateWithLifecycle()
         val isEmpty by remember {
             derivedStateOf { items.isEmpty() }
+        }
+        ResponseListener<ItemScreenResponse> { response ->
+            if (response.args is ItemScreenArgs.Edit) {
+                itemsRepository.updateItem(response.args.index, response.newValue)
+            } else {
+                itemsRepository.addItem(response.newValue)
+            }
         }
         ItemsContent(
             isItemsEmpty = isEmpty,
