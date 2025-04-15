@@ -15,7 +15,7 @@ import com.example.navigationtest.ui.scaffold.AppToolbar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppScaffold() {
-    val navigation = rememberNavigation(initialRoute = AppRoute.Tab.Items)
+    val navigation = rememberNavigation(RootTabs)
     val (router, navigationState) = navigation
     val environment = navigationState.currentScreen.environment as AppScreenEnvironment
     Scaffold(
@@ -35,12 +35,10 @@ fun AppScaffold() {
         },
         floatingActionButtonPosition = FabPosition.End,
         bottomBar = {
-            if (navigationState.isRoot) {
-                AppNavigationBar(
-                    currentRoute = navigationState.currentRoute,
-                    onRouteSelected = router::restart
-                )
-            }
+            AppNavigationBar(
+                currentIndex = navigationState.currentStackIndex,
+                onIndexSelected = router::switchStack
+            )
         }
     ) { paddingValues ->
         AppNavigationHost(

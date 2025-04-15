@@ -6,6 +6,7 @@ import com.example.navigationtest.ui.screens.ItemsScreenProducer
 import com.example.navigationtest.ui.screens.ProfileScreenProducer
 import com.example.navigationtest.ui.screens.SettingsScreenProducer
 import com.example.navigationtest.ui.screens.itemScreenProducer
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.parcelize.Parcelize
 
 sealed class AppRoute(
@@ -31,4 +32,5 @@ sealed class AppRoute(
     }
 }
 
-val RootTabs = listOf(AppRoute.Tab.Items, AppRoute.Tab.Settings, AppRoute.Tab.Profile)
+val RootTabs =
+    persistentListOf(AppRoute.Tab.Items, AppRoute.Tab.Settings, AppRoute.Tab.Profile)

@@ -8,28 +8,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.navigation.Route
 import com.example.navigationtest.ui.RootTabs
 
 @Composable
 fun AppNavigationBar(
-    currentRoute: Route,
-    onRouteSelected: (Route) -> Unit,
+    currentIndex: Int,
+    onIndexSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     NavigationBar(
         modifier = modifier
     ) {
-        RootTabs.forEach { tab ->
+        RootTabs.forEachIndexed { index, tab ->
             val environment = remember(tab) {
                 tab.screenProducer().environment
             }
             val icon = environment.icon
             if (icon != null) {
                 NavigationBarItem(
-                    selected = currentRoute == tab,
+                    selected = currentIndex == index,
                     label = { Text(stringResource(environment.titleRes)) },
-                    onClick = { onRouteSelected(tab) },
+                    onClick = { onIndexSelected(index) },
                     icon = {
                         Icon(
                             imageVector = icon,
@@ -40,4 +41,13 @@ fun AppNavigationBar(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun AppNavigationBarPreview() {
+    AppNavigationBar(
+        currentIndex = 0,
+        onIndexSelected = {}
+    )
 }
