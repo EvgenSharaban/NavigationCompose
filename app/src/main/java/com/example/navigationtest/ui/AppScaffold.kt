@@ -15,7 +15,7 @@ import com.example.navigationtest.ui.scaffold.AppToolbar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppScaffold() {
-    val navigation = rememberNavigation(RootTabs)
+    val navigation = rememberNavigation(RootTabs, deepLinkHandler = AppDeepLinkHandler)
     val (router, navigationState) = navigation
     val environment = navigationState.currentScreen.environment as AppScreenEnvironment
     Scaffold(
