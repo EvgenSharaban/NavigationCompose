@@ -1,11 +1,11 @@
 package com.example.navigationtest.ui
 
 import com.example.navigation.Route
-import com.example.navigationtest.ui.screens.ItemScreenArgs
-import com.example.navigationtest.ui.screens.ItemsScreenProducer
 import com.example.navigationtest.ui.screens.ProfileScreenProducer
 import com.example.navigationtest.ui.screens.SettingsScreenProducer
-import com.example.navigationtest.ui.screens.itemScreenProducer
+import com.example.navigationtest.ui.screens.item.ItemScreenArgs
+import com.example.navigationtest.ui.screens.item.itemScreenProducer
+import com.example.navigationtest.ui.screens.items.ItemsScreenProducer
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.parcelize.Parcelize
 

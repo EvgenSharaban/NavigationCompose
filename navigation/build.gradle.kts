@@ -50,4 +50,5 @@ dependencies {
     implementation(libs.androidx.foundation)
 
     api(libs.kotlinx.collections.immutable)
+    api(libs.androidx.lifecycle.viewmodel.compose)
 }

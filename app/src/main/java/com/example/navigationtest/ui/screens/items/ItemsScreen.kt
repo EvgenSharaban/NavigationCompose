@@ -1,4 +1,4 @@
-package com.example.navigationtest.ui.screens
+package com.example.navigationtest.ui.screens.items
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.navigation.LocalRouter
 import com.example.navigation.ResponseListener
 import com.example.navigation.Router
@@ -30,6 +31,7 @@ import com.example.navigationtest.ui.AppScreenEnvironment
 import com.example.navigationtest.ui.DropdownItem
 import com.example.navigationtest.ui.FloatingAction
 import com.example.navigationtest.ui.scaffold.showToast
+import com.example.navigationtest.ui.screens.item.ItemScreenArgs
 
 val ItemsScreenProducer = { ItemsScreen() }
 
@@ -65,18 +67,13 @@ class ItemsScreen : AppScreen {
     override fun Content() {
         router = LocalRouter.current
 
-        val itemsRepository = ItemsRepository.get()
-        val items by itemsRepository.getItems().collectAsStateWithLifecycle()
+//        val itemsRepository = ItemsRepository.get()
+        val viewModel = viewModel<ItemsViewModel>()
+        val items by viewModel.itemsFlow.collectAsStateWithLifecycle()
         val isEmpty by remember {
             derivedStateOf { items.isEmpty() }
         }
-        ResponseListener<ItemScreenResponse> { response ->
-            if (response.args is ItemScreenArgs.Edit) {
-                itemsRepository.updateItem(response.args.index, response.newValue)
-            } else {
-                itemsRepository.addItem(response.newValue)
-            }
-        }
+        ResponseListener(viewModel::processResponse)
         ItemsContent(
             isItemsEmpty = isEmpty,
             items = { items },

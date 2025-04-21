@@ -4,7 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.example.navigation.links.DeepLinkHandler
 import com.example.navigation.links.MultiStackState
-import com.example.navigationtest.ui.screens.ItemScreenArgs
+import com.example.navigationtest.ui.screens.item.ItemScreenArgs
 
 object AppDeepLinkHandler : DeepLinkHandler {
 
